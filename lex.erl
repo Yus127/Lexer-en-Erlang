@@ -1,5 +1,16 @@
 -module(lex).
--export([dfa/5, search/2, ws/0, num/0, numDec/0, numExp/0, eq/0, plus/0, minus/0, star/0, comm/0, slash/0, gor/0, id/0, lp/0, rp/0]).
+-export([dfa/5, search/2, ws/0, num/0, numDec/0, numExp/0, eq/0, plus/0, minus/0, star/0, comm/0, slash/0, gor/0, id/0, lp/0, rp/0, start/0, otra/5]).
+
+%TODO : revisar que se ponen en orden en el mapa, lo quiero en mí orden
+
+%TODO : que regrese el string en la función otra
+
+start() ->   
+  Lst1 = [lex:num(), lex:numDec(),lex:comm(),lex:rp(), lex:lp(),lex:id(),lex:gor(), lex:slash(), lex:star(), lex:minus(), lex:plus(), lex:eq(), lex:numExp() , lex:ws()], %reordeanr 
+  %Lst1 = [lex:id()],
+  maps:from_list(Lst1).
+  %io:fwrite("~p~n",[maps:get(#{0 => #{42 => 1}},Map1)]),
+  %{M,E}=maps:keys(Map1),maps:values(Map1).
 
 ws() ->
   M_0 = maps:new(),
@@ -367,8 +378,15 @@ rp() ->
 
 
 
-
-
+otra(_,_,[],[], _) -> error;
+otra(State,String,[H|T],[H1|T1], Lexeme) ->
+  case dfa(State,String, H, H1, Lexeme) of
+    {rejected, _} ->
+      %io:format("Rejected"),
+      otra(State,String,T,T1, Lexeme);
+    {accepted, String1, Lexema1, Token} -> (Token)
+ 
+  end.
 
 
 
@@ -398,6 +416,8 @@ rp() ->
 %search(State, States)
 search(_, []) -> false;
 search(State, [H | T]) ->
+ %io:format("~w", [State]),
+ %io:format("\n"),
   case H of
     {State, Star, Token} -> {value, {State, Star, Token}};
     _ -> search(State, T)
