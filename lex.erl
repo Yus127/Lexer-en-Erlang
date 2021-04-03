@@ -1,14 +1,11 @@
 -module(lex).
--export([dfa/5, search/2, ws/0, num/0, numDec/0, numExp/0, eq/0, plus/0, minus/0, star/0, comm/0, slash/0, gor/0, id/0, lp/0, rp/0, start/0, otra/5]).
+-export([dfa/5, search/2, ws/0, num/0, numDec/0, numExp/0, eq/0, plus/0, minus/0, star/0, comm/0, slash/0, gor/0, id/0, lp/0, rp/0, start/0, inicial/3, cacha/3, nueva/1]).
+-import(lists,[last/1]).
 
-%TODO : revisar que se ponen en orden en el mapa, lo quiero en mí orden
 
-%TODO : que regrese el string en la función otra
 
 start() ->   
-  Lst1 = [lex:num(), lex:numDec(),lex:comm(),lex:rp(), lex:lp(),lex:id(),lex:gor(), lex:slash(), lex:star(), lex:minus(), lex:plus(), lex:eq(), lex:numExp() , lex:ws()], %reordeanr 
-  %Lst1 = [lex:id()],
-  maps:from_list(Lst1).
+  [lex:ws(), lex:numExp(),lex:numDec(),lex:num() ,lex:comm(),lex:rp(), lex:lp(),lex:id(),lex:gor(), lex:slash(), lex:star(), lex:minus(), lex:plus(), lex:eq()].
   %io:fwrite("~p~n",[maps:get(#{0 => #{42 => 1}},Map1)]),
   %{M,E}=maps:keys(Map1),maps:values(Map1).
 
@@ -169,6 +166,7 @@ numExp() ->
   M_0_7 = maps:put($7,1,M_0_6),
   M_0_8 = maps:put($8,1,M_0_7),
   M_0_9 = maps:put($9,1,M_0_8),
+  M_0_DOT = maps:put($.,1,M_0_9),
 
   M_1_0 = maps:put($0,1,M_0),
   M_1_1 = maps:put($1,1,M_1_0),
@@ -182,7 +180,6 @@ numExp() ->
   M_1_9 = maps:put($9,1,M_1_8),
   M_1_DOT = maps:put($.,2,M_1_9),
   M_1_e = maps:put($e,4,M_1_DOT),
-  M_1_E = maps:put($E,4,M_1_e),
 
   M_2_0 = maps:put($0,3,M_0),
   M_2_1 = maps:put($1,3,M_2_0),
@@ -206,7 +203,6 @@ numExp() ->
   M_3_8 = maps:put($8,3,M_3_7),
   M_3_9 = maps:put($9,3,M_3_8),
   M_3_e = maps:put($e,4,M_3_9),
-  M_3_E = maps:put($E,4,M_3_e),
 
   M_4_0 = maps:put($0,6,M_0),
   M_4_1 = maps:put($1,6,M_4_0),
@@ -260,7 +256,7 @@ numExp() ->
   M_6_BLANK = maps:put(32,7,M_6_DOL),
   M_6_LF = maps:put(10,7,M_6_BLANK),
 
-  {maps:put(6, M_6_LF, maps:put(5, M_5_9, maps:put(4,M_4_MINUS, maps:put(3, M_3_E, maps:put( 2,M_2_9, maps:put( 1, M_1_E, maps:put(0,M_0_9 ,M_0))))))), [{7, $*, "NumeroExp"}]}.
+  {maps:put(6, M_6_LF, maps:put(5, M_5_9, maps:put(4,M_4_MINUS, maps:put(3, M_3_e, maps:put( 2,M_2_9, maps:put( 1, M_1_e, maps:put(0,M_0_DOT ,M_0))))))), [{7, $*, "NumeroExp"}]}.
 
 eq() ->
   M_0 = maps:new(),
@@ -378,17 +374,32 @@ rp() ->
 
 
 
-otra(_,_,[],[], _) -> error;
-otra(State,String,[H|T],[H1|T1], Lexeme) ->
-  case dfa(State,String, H, H1, Lexeme) of
-    {rejected, _} ->
-      %io:format("Rejected"),
-      otra(State,String,T,T1, Lexeme);
-    {accepted, String1, Lexema1, Token} -> (Token)
- 
+nueva(String) ->
+  %Lst=lex:start(),
+  cacha(String, "", "").
+
+
+
+
+cacha([],Lex,Tok) -> {Lex,Tok};
+cacha(Str, Lex, Tok) ->
+  case inicial(Str, lex:start(), "") of 
+    {StrR, LexR, TokR} -> 
+    cacha(StrR, Lex ++ [LexR], Tok ++ [TokR]);
+    _ -> error
   end.
 
 
+
+inicial(_,[],_) -> error;
+inicial(Strin,[H1|T1],Lex) ->
+  {Move1,Estate1} = H1,
+  case dfa(0,Strin,Move1,Estate1,Lex) of
+    {rejected, _} ->
+      %io:format("Rejected"),
+      inicial(Strin,T1, Lex);
+    {accepted, String1, Lexema1, Token} -> {String1, Lexema1,Token}
+  end.
 
   dfa(State,String, Move, Accepted, Lexeme) ->
   %io:format("~w, ~s, ~s~n", [State, String, Lexeme]),
