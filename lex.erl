@@ -1,16 +1,12 @@
+% Programa que recibe como entrada un archivo de texto, el cual contiene expresiones aritméticas y comentarios, el cual regresara una tabla con cada uno de los tokens que fueron hallados, indicando el orden en el que fueron encontrados y tipo son.
+% Yusdivia Molina Román A01653120
+% Lidia Paola Díaz Ramírez A01369117
+% Fecha de modificacion: 06/04/2021
 
 -module(lex).
--export([dfa/5, search/2, ws/0, num/0, numDec/0, numExp/0, eq/0, plus/0, minus/0, star/0, comm/0, slash/0, gor/0, id/0, lp/0, rp/0, eo/0, start/0, inicial/3, cacha/3, nueva/1, imprimr/2, imprimr2/3,cacha2/3, lee/2]).
--import(lists,[last/1]).
+-export([dfa/5, search/2, ws/0, num/0, numDec/0, numExp/0, eq/0, plus/0, minus/0, star/0, comm/0, slash/0, gor/0, id/0, lp/0, rp/0, eo/0, start/0, evaluate/3, print/3, everything/3, lee/2, lexerAritmetico/1]).
 
-
-%% volver a revisar la correlación con los mapas y tablas
-
-
-start() ->   
-  [lex:ws(), lex:numExp(),lex:numDec(),lex:num() ,lex:comm(),lex:rp(), lex:lp(),lex:id(),lex:gor(), lex:slash(), lex:star(), lex:minus(), lex:plus(), lex:eq(), lex:eo()].
- 
-
+% Creación de mapas de mapas y estados finales de aceptación, conforme los diagramas y tablas de transición
 ws() ->
   M_0 = maps:new(),
   M_0_BLANK = maps:put(32,1,M_0),
@@ -50,7 +46,8 @@ ws() ->
 
 num() ->
   M_0 = maps:new(),
-  M_0_0 = maps:put($0,1,M_0),
+  M_0_MINUS = maps:put($-,1,M_0),
+  M_0_0 = maps:put($0,1,M_0_MINUS),
   M_0_1 = maps:put($1,1,M_0_0),
   M_0_2 = maps:put($2,1,M_0_1),
   M_0_3 = maps:put($3,1,M_0_2),
@@ -85,18 +82,18 @@ num() ->
   M_1_GOR = maps:put($^,2,M_1_DOT),
   M_1_LP = maps:put($(,2,M_1_GOR),
   M_1_RP = maps:put($),2,M_1_LP),
-  M_1_SL = maps:put($\ ,2,M_1_RP),
+  M_1_SL = maps:put($\n ,2,M_1_RP),
   M_1_DOL = maps:put($$,2,M_1_SL),
   M_1_BLANK = maps:put(32,2,M_1_DOL),
   M_1_BB = maps:put(10,2,M_1_BLANK),
-  M_1_LF = maps:put($\n,2,M_1_BB),
-  {maps:put(1, M_1_LF, maps:put(0,M_0_9, M_0)), [{2, $*, "NumeroEntero"}]}.
+  M_1_LF = maps:put($\ ,2,M_1_BB),
 
-
+  {maps:put(1, M_1_LF, maps:put(0,M_0_9, M_0)), [{2, $*, "Numero entero"}]}.
 
 numDec() ->
   M_0 = maps:new(),
-  M_0_0 = maps:put($0,1,M_0),
+  M_0_MINUS = maps:put($-,1,M_0),
+  M_0_0 = maps:put($0,1,M_0_MINUS),
   M_0_1 = maps:put($1,1,M_0_0),
   M_0_2 = maps:put($2,1,M_0_1),
   M_0_3 = maps:put($3,1,M_0_2),
@@ -106,6 +103,7 @@ numDec() ->
   M_0_7 = maps:put($7,1,M_0_6),
   M_0_8 = maps:put($8,1,M_0_7),
   M_0_9 = maps:put($9,1,M_0_8),
+  M_0_DOT = maps:put($.,2,M_0_9),
 
   M_1_0 = maps:put($0,1,M_0),
   M_1_1 = maps:put($1,1,M_1_0),
@@ -155,17 +153,17 @@ numDec() ->
   M_3_LP = maps:put($(,4,M_3_GOR),
   M_3_RP = maps:put($),4,M_3_LP),
   M_3_DOL = maps:put($$,4,M_3_RP),
-  M_3_SL = maps:put($\ ,4,M_3_DOL),
+  M_3_SL = maps:put($\n ,4,M_3_DOL),
   M_3_BLANK = maps:put(32,4,M_3_SL),
   M_3_BB = maps:put(10,4,M_3_BLANK),
-  M_3_LF = maps:put($\n,4,M_3_BB),
+  M_3_LF = maps:put($\ ,4,M_3_BB),
 
-  {maps:put(3, M_3_LF, maps:put(2, M_2_9, maps:put(1,M_1_DOT, maps:put(0, M_0_9, M_0)))), [{4, $*, "NumeroDec"}]}.
-
+  {maps:put(3, M_3_LF, maps:put(2, M_2_9, maps:put(1,M_1_DOT, maps:put(0, M_0_DOT, M_0)))), [{4, $*, "Numero decimal"}]}.
 
 numExp() ->
   M_0 = maps:new(),
-  M_0_0 = maps:put($0,1,M_0),
+  M_0_MINUS = maps:put($-,1,M_0),
+  M_0_0 = maps:put($0,1,M_0_MINUS),
   M_0_1 = maps:put($1,1,M_0_0),
   M_0_2 = maps:put($2,1,M_0_1),
   M_0_3 = maps:put($3,1,M_0_2),
@@ -175,7 +173,7 @@ numExp() ->
   M_0_7 = maps:put($7,1,M_0_6),
   M_0_8 = maps:put($8,1,M_0_7),
   M_0_9 = maps:put($9,1,M_0_8),
-  M_0_DOT = maps:put($.,1,M_0_9),
+  M_0_DOT = maps:put($.,2,M_0_9),
 
   M_1_0 = maps:put($0,1,M_0),
   M_1_1 = maps:put($1,1,M_1_0),
@@ -262,31 +260,35 @@ numExp() ->
   M_6_LP = maps:put($(,7,M_6_GOR),
   M_6_RP = maps:put($),7,M_6_LP),
   M_6_DOL = maps:put($$,7,M_6_RP),
-  M_6_SL = maps:put($\ ,7,M_6_DOL),
+  M_6_SL = maps:put($\n ,7,M_6_DOL),
   M_6_BLANK = maps:put(32,7,M_6_SL),
   M_6_BB = maps:put(10,7,M_6_BLANK),
-  M_6_LF = maps:put($\n,7,M_6_BB),
+  M_6_LF = maps:put($\ ,7,M_6_BB),
 
-  {maps:put(6, M_6_LF, maps:put(5, M_5_9, maps:put(4,M_4_MINUS, maps:put(3, M_3_e, maps:put( 2,M_2_9, maps:put( 1, M_1_e, maps:put(0,M_0_DOT ,M_0))))))), [{7, $*, "NumeroExp"}]}.
+  {maps:put(6, M_6_LF, maps:put(5, M_5_9, maps:put(4,M_4_MINUS, maps:put(3, M_3_e, maps:put( 2,M_2_9, maps:put( 1, M_1_e, maps:put(0,M_0_DOT ,M_0))))))), [{7, $*, "Numero notacion cientifica"}]}.
 
 eq() ->
   M_0 = maps:new(),
   M_0_EQ = maps:put($=,1,M_0),
-  {maps:put(0, M_0_EQ, M_0), [{1, no, "Asignación" }]}.
+
+  {maps:put(0, M_0_EQ, M_0), [{1, no, "Asignacion" }]}.
 
 plus() ->
   M_0 = maps:new(),
   M_0_PLUS = maps:put($+,1,M_0),
+
   {maps:put(0, M_0_PLUS, M_0), [{1, no, "Suma" }]}.
 
 minus() ->
   M_0 = maps:new(),
   M_0_MINUS = maps:put($-,1,M_0),
+
   {maps:put(0, M_0_MINUS, M_0), [{1, no, "Resta" }]}.
 
 star() ->
   M_0 = maps:new(),
   M_0_STAR = maps:put($*,1,M_0),
+
   {maps:put(0, M_0_STAR, M_0), [{1, no, "Multipliacion" }]}.
 
 comm() ->
@@ -320,21 +322,23 @@ comm() ->
   M_2_LP = maps:put($(,2,M_2_GOR),
   M_2_RP = maps:put($),2,M_2_LP),
   M_2_DOL = maps:put($$,2,M_2_RP),
-  M_2_SL = maps:put($\ ,2,M_2_DOL),
+  M_2_SL = maps:put($\n,3,M_2_DOL),
   M_2_BLANK = maps:put(32,2,M_2_SL),
-  M_2_BB = maps:put(10,2,M_2_BLANK),
-  M_2_LF = maps:put($\n,3,M_2_BB),
+  M_2_BB = maps:put(10,3,M_2_BLANK),
+  M_2_LF = maps:put($\ ,2,M_2_BB),
 
   {maps:put(2, M_2_LF, maps:put(1, M_1_SLASH, maps:put(0,M_0_SLASH, M_0))), [{3, no, "Comentario"}]}.
 
 slash() ->
   M_0 = maps:new(),
   M_0_SLASH = maps:put($/,1,M_0),
+
   {maps:put(0, M_0_SLASH, M_0), [{1, no, "Division" }]}.
 
 gor() ->
   M_0 = maps:new(),
   M_0_GOR = maps:put($^,1,M_0),
+
   {maps:put(0, M_0_GOR, M_0), [{1, no, "Potencia" }]}.
 
 id() ->
@@ -373,92 +377,67 @@ id() ->
   M_1_SL = maps:put($\n,2,M_1_DOL),
   M_1_BLANK = maps:put(32,2,M_1_SL),
   M_1_BB = maps:put(10,2,M_1_BLANK),
-  M_1_LF = maps:put($\ ,3,M_1_BB),
+  M_1_LF = maps:put($\ ,2,M_1_BB),
 
   {maps:put(1, M_1_LF, maps:put(0,M_0e, M_0)), [{2, $*, "Variable"}]}.
 
 lp() ->
   M_0 = maps:new(),
   M_0_LP = maps:put($(,1,M_0),
-  {maps:put(0, M_0_LP, M_0), [{1, no, "ParenesisIz"}]}.
+
+  {maps:put(0, M_0_LP, M_0), [{1, no, "Parentesis que abre"}]}.
 
 rp() ->
   M_0 = maps:new(),
   M_0_RP = maps:put($),1,M_0),
-  {maps:put(0, M_0_RP, M_0), [{1, no, "ParenesisDer"}]}.
+
+  {maps:put(0, M_0_RP, M_0), [{1, no, "Parentesis que cierra"}]}.
 
 eo() ->
   M_0 = maps:new(),
   M_0_EO = maps:put($$,1,M_0),
+
   {maps:put(0, M_0_EO, M_0), [{1, no, "Fin"}]}.
 
+%Creación de lista con las tuplas de los mapas de mapas y estados finales de aceptación
+start() ->   
+  [lex:ws(), lex:numExp(),lex:numDec(),lex:num() ,lex:comm(),lex:rp(), lex:lp(),lex:id(),lex:gor(), lex:slash(), lex:star(), lex:minus(), lex:plus(), lex:eq(), lex:eo()].
 
+%Función inicial donde solo recibe el nombre del archivo que va a leer
+lexerAritmetico(Archivo) ->
+  lee(Archivo, "$").
 
+%Lectura del archivo enviado por la función lexerAritmetico. Se le añade al final el sigo de pesos ("$") para indicar el fin del archivo
+lee(Archivo, Terminador) ->
+  {ok, Contenido} = file:read_file(Archivo),
+  A= binary_to_list(Contenido) ++ Terminador,
+  everything(A, "", "").
 
-
-
-
-imprimr([],[]) -> io:format(" ");
-imprimr([HL|TL],[HT|TT]) ->
-if 
-  HT =="Blanco" ->
-    imprimr(TL,TT);
-  true ->
-    io:format(HL),
-    io:format("\t"),
-    io:format(HT),
-    io:format("\n"),
-    imprimr(TL,TT)
-    end.
-
-
-imprimr2(Device, [],[]) -> file:close(Device);
-imprimr2(Device, [HL|TL],[HT|TT]) ->
-if 
-  HT =="Blanco" ->
-    imprimr2(Device, TL,TT);
-  true ->
-    io:format(Device, "~-30s", [HL]),
-    io:format(Device,"~s\n", [HT]),
-    imprimr2(Device,TL,TT)
-    end.
-
-cacha2([],Lex,Tok) -> io:format("Lexema   Token\n"),
-{ok,Device}=file:open("salida.txt",write),
-imprimr2(Device,Lex,Tok);
-cacha2(Str, Lex, Tok) ->
-  case inicial(Str, lex:start(), "") of 
+%Función que recorre todo el string a evaluarse, con ayuda de la función evaluate. Una vez termina de evaluarse todo el archivo, se crea un archivo de salida y se manda a llamar la función para escribir sobre el archivo
+everything([], Lex, Tok) -> 
+  {ok, Device}=file:open("salida.txt", write),
+  io:format(Device, "~-30s", ["Lexema"]),
+  io:format(Device,"~s\n", ["Token"]),
+  print(Device, Lex, Tok);
+everything(Str, Lex, Tok) ->
+  case evaluate(Str, lex:start(), "") of 
     {StrR, LexR, TokR} -> 
-    cacha2(StrR, Lex ++ [LexR], Tok ++ [TokR]);
+    everything(StrR, Lex ++ [LexR], Tok ++ [TokR]);
     _ -> error
   end.
 
-
-
-
-cacha([],Lex,Tok) -> io:format("Lexema   Token\n"),
-imprimr(Lex,Tok);
-cacha(Str, Lex, Tok) ->
-  case inicial(Str, lex:start(), "") of 
-    {StrR, LexR, TokR} -> 
-    cacha(StrR, Lex ++ [LexR], Tok ++ [TokR]);
-    _ -> error
-  end.
-
-
-
-inicial(_,[],_) -> error;
-inicial(Strin,[H1|T1],Lex) ->
-  {Move1,Estate1} = H1,
-  case dfa(0,Strin,Move1,Estate1,Lex) of
+%Función que recibe el string a evaluar y la lista de todos los mapas con sus estados de aceptación. Llama a la función dfa para evaluar si el string coincide con algún elemento de la lista. Regresa error o el string a seguir evaluando, el lexema y el token del encontrado. 
+evaluate(_, [], _) -> error;
+evaluate(Strin, [H1|T1], Lex) ->
+  {Move1, Estate1} = H1,
+  case dfa(0, Strin, Move1, Estate1, Lex) of
     {rejected, _} ->
-      %io:format("Rejected"),
-      inicial(Strin,T1, Lex);
-    {accepted, String1, Lexema1, Token} -> {String1, Lexema1,Token}
+      evaluate(Strin, T1, Lex);
+    {accepted, String1, Lexema1, Token} -> {String1, Lexema1, Token}
   end.
 
-  dfa(State,String, Move, Accepted, Lexeme) ->
-  %io:format("~w, ~s, ~s~n", [State, String, Lexeme]),
+%Función que hace la evaluación de los mapas de mapas y estados finales de aceptación con el string a ser leído 
+dfa(State, String, Move, Accepted, Lexeme) ->
   case search(State, Accepted) of
     {value, {State, Star, Token}} ->
       case Star of
@@ -480,25 +459,24 @@ inicial(Strin,[H1|T1],Lex) ->
       end
   end.
 
-%search(State, States)
+%Función de apoyo para evaluar si ya se alcanzó un estado final de aceptación para el dfa. 
 search(_, []) -> false;
 search(State, [H | T]) ->
- %io:format("~w", [State]),
- %io:format("\n"),
   case H of
     {State, Star, Token} -> {value, {State, Star, Token}};
     _ -> search(State, T)
   end.
 
-
-
-
-
-nueva(String) ->
-  cacha(String, "", "").
-
-lee(Archivo, Terminador) ->
-  {ok, Contenido} = file:read_file(Archivo),
-  binary_to_list(Contenido) ++ Terminador.
-
-
+%Función que escribe sobre el documento abierto por everything. Recibe el documento y dos listas con los lexemas y tokens encontrados
+print(Device, [],[]) -> file:close(Device);
+print(Device, [HL|TL],[HT|TT]) ->
+if 
+  HT =="Blanco" ->
+    print(Device, TL,TT);
+  HT =="Fin" ->
+    print(Device, TL, TT);
+  true ->
+    io:format(Device, "~-30s", [HL]),
+    io:format(Device, "~s\n", [HT]),
+    print(Device, TL, TT)
+    end.

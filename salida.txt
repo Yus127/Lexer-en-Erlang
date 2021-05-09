@@ -1,0 +1,30 @@
+Lexema                        Token
+b                             Variable
+=                             Asignacion
+7                             Numero entero
+a                             Variable
+=                             Asignacion
+32.4                          Numero decimal
+*                             Multipliacion
+(                             Parentesis que abre
+-8.6                          Numero decimal
+-                             Numero entero
+b                             Variable
+)                             Parentesis que cierra
+/                             Division
+6.1e-8                        Numero notacion cientifica
+d                             Variable
+=                             Asignacion
+a                             Variable
+^                             Potencia
+b                             Variable
+// abc
+                       Comentario
+abcd                          Variable
++                             Suma
+ab12                          Variable
+-                             Numero entero
+ab122                         Variable
+a123                          Variable
++                             Suma
+b123                          Variable
