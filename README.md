@@ -5,4 +5,5 @@ Para la elaboración de este entregable se utilizó el lenguaje de programación
 Se adjunta un ejemplo para correr el código:
 En la parte de la salida, si todo fue correcto se obtiene un archivo .txt con dos columnas, una para indicar los lexemas que se leyeron, en el orden dado, y otra para los nombres de los tokens definidos. Por ejemplo:
 
-Diagramas: https://drive.google.com/file/d/1oW06w2nFe0zKerw-Xhv3uMAxFfLXwLsC/view?usp=sharing Tablas: https://docs.google.com/spreadsheets/d/1Zd4BZ8SCpO74NuV2Wj37Z3x6GzEAW5tnVCHT GW5-V24/edit?usp=sharing
+Diagramas: https://drive.google.com/file/d/1oW06w2nFe0zKerw-Xhv3uMAxFfLXwLsC/view?usp=sharing 
+Tablas: https://docs.google.com/spreadsheets/d/1Zd4BZ8SCpO74NuV2Wj37Z3x6GzEAW5tnVCHT GW5-V24/edit?usp=sharing
